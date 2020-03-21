@@ -14,7 +14,6 @@ public class TwoActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState){
         DebugBox.init(getApplication());
         DebugBox.get().open();
-        KeyboardHelper. bindActivity(this);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
