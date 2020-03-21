@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/et_input"
-        android:text="添加一个View" />
+        android:text="弹出dialog" />
 
     <LinearLayout
         android:id="@+id/layout"
@@ -27,6 +27,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:textSize="30sp"
         android:background="@color/colorAccent"
         android:visibility="gone" />
 </RelativeLayout>

@@ -47,12 +47,12 @@ public class KeyboardHelper {
         if (sKeyboardMinHeight <= 0) {
             sKeyboardMinHeight = dip2px(window.getContext(), 150);
         }
-        final int SCREEN_HEIGHT;
+        final int windowRectBottom;
 
         if (isLandscape) {
-            SCREEN_HEIGHT = windowRect.width();
+            windowRectBottom = windowRect.width();
         } else {
-            SCREEN_HEIGHT = windowRect.height();
+            windowRectBottom = windowRect.bottom;
         }
 
         final View decorView = window.getDecorView();
@@ -60,7 +60,8 @@ public class KeyboardHelper {
             @Override
             public void onGlobalLayout() {
                 decorView.getWindowVisibleDisplayFrame(windowRect);
-                final int dy = SCREEN_HEIGHT - windowRect.height();
+                final int dy = windowRectBottom - windowRect.bottom;
+                Log.e("noah",windowRect.toString());
                 if (dy < sKeyboardMinHeight) {
                     //键盘没有弹出来
                     listener.onKeyBoardEvent(false, sKeyboardHeight);

@@ -1,15 +1,16 @@
 package com.keyboard.test;
 
-import android.graphics.Color;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.keyboard.monitor.KeyboardHelper;
@@ -26,12 +27,6 @@ public class MainActivity extends AppCompatActivity {
 //        DebugBox.init(getApplication());
 //        DebugBox.get().open();
 
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_main);
-
-//        startActivity(new Intent(this,TwoActivity.class));
-        initView();
         KeyboardHelper.registerKeyboardListener(getWindow(), new OnKeyboardListener() {
             @Override
             public void onKeyBoardEvent(boolean isShow, int height) {
@@ -46,6 +41,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+//        startActivity(new Intent(this,TwoActivity.class));
+        initView();
+//        Resources system = Resources.getSystem();
+//        TypedValue.applyDimension();
+        Log.e("noah",getResources().getDisplayMetrics().toString());
     }
 
     private void initView() {
@@ -56,11 +58,12 @@ public class MainActivity extends AppCompatActivity {
         btAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TextView view = new TextView(MainActivity.this);
-                view.setText("哈哈");
-                view.setGravity(View.TEXT_ALIGNMENT_CENTER);
-                view.setTextColor(Color.BLACK);
-                layout.addView(view);
+//                TextView view = new TextView(MainActivity.this);
+//                view.setText("哈哈");
+//                view.setGravity(View.TEXT_ALIGNMENT_CENTER);
+//                view.setTextColor(Color.BLACK);
+//                layout.addView(view);
+                new AlertDialog.Builder(MainActivity.this).setView(R.layout.layout_input_alert_view).create().show();
             }
         });
     }
