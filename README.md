@@ -27,5 +27,14 @@ Step 2. Add the dependency
 	        implementation 'com.github.fengxiaocan:KeyboardMonitor:v1.0'
 	}
   
+  eg:
+  
+  	KeyboardHelper.registerKeyboardListener(getWindow(),new OnKeyboardListener(){
+            @Override
+            public void onKeyBoardEvent(boolean isShow,int height){
+                
+            }
+        });
+  
 ![avatar](/doc/image1.png)
 ![avatar](/doc/image2.png)
