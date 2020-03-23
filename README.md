@@ -1,9 +1,11 @@
 # KeyboardMonitor
 Probably the best keyboard monitor on the github.
-大概是全网最好的键盘监听了
 
-The android keyboard listener listens for keyboard height to show or hide
-安卓 键盘监听器 监听键盘高度跟显示or隐藏
+大概是全网最好的键盘监听了.
+
+The android keyboard listener listens for keyboard height to show or hide.
+
+安卓 键盘监听器 监听键盘高度跟显示or隐藏.
 
 It can be registered in dialog and popupWindow. It can accurately recognize the status of the pop-up keyboard and accurately obtain the height of the current keyboard. It is compatible with full screen status, hiding or enabling virtual navigation keys, dynamically changing dp and other emergencies.
 
