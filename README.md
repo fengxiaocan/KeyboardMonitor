@@ -11,5 +11,21 @@ It can be registered in dialog and popupWindow. It can accurately recognize the 
 
 可以在dialog跟popupWindow中注册使用。能够准确的识别弹出键盘状态以及准确获取当前键盘的高度,兼容全屏状态、隐藏或启用虚拟导航键、动态改变dp等突发状况。
 
+Step 1. Add the JitPack repository to your build file
+
+Add it in your root build.gradle at the end of repositories:
+
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+Step 2. Add the dependency
+
+	dependencies {
+	        implementation 'com.github.fengxiaocan:KeyboardMonitor:v1.0'
+	}
+  
 ![avatar](/doc/image1.png)
 ![avatar](/doc/image2.png)
