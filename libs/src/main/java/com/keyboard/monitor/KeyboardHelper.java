@@ -1,12 +1,17 @@
 package com.keyboard.monitor;
 
-import android.content.Context;
+import android.app.Activity;
+import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
-import android.util.Log;
+import android.os.Build;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
+
+import androidx.annotation.RequiresApi;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +21,7 @@ public class KeyboardHelper{
     private static final Rect windowRect = new Rect();
     private static Map<String,ViewTreeObserver.OnGlobalLayoutListener> onLayoutListeners = new HashMap<>();
 
+    private static int sScreenDisplayHeight = - 1;
     private static int sKeyboardMinHeight = - 1;
     private static int sKeyboardHeight = - 1;
 
@@ -28,49 +34,66 @@ public class KeyboardHelper{
         KeyboardHelper.sKeyboardMinHeight = sMinHeight;
     }
 
+
     /**
      * 注册键盘监听器
      *
-     * @param window      当前所在的window,可以在dialog中使用
-     * @param tag         标记
-     * @param isLandscape 是否横屏状态
-     * @param listener    回调
+     * @param window   当前所在的window,可以在dialog中使用
+     * @param listener 回调
      */
-    public static void registerKeyboardListener(Window window,
-            String tag,
-            boolean isLandscape,
-            final OnKeyboardListener listener)
+    public static void registerKeyboardListener(Window window,final OnKeyboardListener listener){
+        if(window == null || listener == null){
+            return;
+        }
+        registerKeyboard(window,window.toString(),listener);
+    }
+
+
+    /**
+     * 注册键盘监听器
+     *
+     * @param window   当前所在的window,可以在dialog中使用
+     * @param tag      标记
+     * @param listener 回调
+     */
+    public static void registerKeyboardListener(final Window window,String tag,final OnKeyboardListener listener)
     {
         if(window == null || tag == null || listener == null){
             return;
         }
-        //先获取高度
-        WindowManager wm = window.getWindowManager();
-        wm.getDefaultDisplay().getRectSize(windowRect);
+        registerKeyboard(window,tag,listener);
+    }
+
+    private static void registerKeyboard(Window window,String tag,final OnKeyboardListener listener){
         //判断最小高度
         if(sKeyboardMinHeight <= 0){
-            sKeyboardMinHeight = dip2px(window.getContext(),150);
+            sKeyboardMinHeight = dip2px(150);
         }
-        final int windowRectBottom;
-
-        if(isLandscape){
-            windowRectBottom = windowRect.width();
-        } else{
-            windowRectBottom = windowRect.bottom;
-        }
-
+        getDisplayHeight(window);
         final View decorView = window.getDecorView();
+        final View visibleLayout = ((ViewGroup)decorView).getChildAt(0);
         final ViewTreeObserver.OnGlobalLayoutListener layoutListener = new ViewTreeObserver.OnGlobalLayoutListener(){
             @Override
             public void onGlobalLayout(){
                 decorView.getWindowVisibleDisplayFrame(windowRect);
-                final int dy = windowRectBottom - windowRect.bottom;
+                //获取可见view的高度
+                final int dHeight = decorView.getMeasuredHeight();
+                final int vHeight = visibleLayout.getMeasuredHeight();
+                //boolean isHasNavigationBar = dHeight>vHeight; //有导航键
+                final int dy;
+                if(dHeight < sScreenDisplayHeight){
+                    //说明当前处于全屏状态,挖孔屏下的状态栏异常,eg:小米9
+                    dy = vHeight - windowRect.height();
+                } else{
+                    //非全屏状态下
+                    dy = vHeight - windowRect.bottom;
+                }
+
                 if(dy < sKeyboardMinHeight){
                     //键盘没有弹出来
                     listener.onKeyBoardEvent(false,sKeyboardHeight);
                 } else{
                     //键盘弹出来了
-                    //Log.e("noah","键盘高度为:"+sKeyboardHeight);
                     listener.onKeyBoardEvent(true,sKeyboardHeight = dy);
                 }
             }
@@ -80,42 +103,24 @@ public class KeyboardHelper{
     }
 
     /**
-     * 注册键盘监听器
+     * 获取屏幕的设备绝对高度
      *
-     * @param window      当前所在的window,可以在dialog中使用
-     * @param isLandscape 是否横屏状态
-     * @param listener    回调
+     * @param window
      */
-    public static void registerKeyboardListener(Window window,boolean isLandscape,final OnKeyboardListener listener){
-        if(window == null){
-            return;
+    private static void getDisplayHeight(Window window){
+        if(sScreenDisplayHeight <= 0){
+            //全部高度
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
+                Point point = new Point();
+                window.getWindowManager().getDefaultDisplay().getRealSize(point);
+                sScreenDisplayHeight = point.y;
+            } else{
+                window.getWindowManager().getDefaultDisplay().getRectSize(windowRect);
+                sScreenDisplayHeight = windowRect.height();
+            }
         }
-        registerKeyboardListener(window,window.toString(),isLandscape,listener);
     }
 
-    /**
-     * 注册键盘监听器
-     *
-     * @param window   当前所在的window,可以在dialog中使用
-     * @param tag      标记
-     * @param listener 回调
-     */
-    public static void registerKeyboardListener(Window window,String tag,final OnKeyboardListener listener){
-        registerKeyboardListener(window,tag,false,listener);
-    }
-
-    /**
-     * 注册键盘监听器
-     *
-     * @param window   当前所在的window,可以在dialog中使用
-     * @param listener 回调
-     */
-    public static void registerKeyboardListener(Window window,final OnKeyboardListener listener){
-        if(window == null){
-            return;
-        }
-        registerKeyboardListener(window,window.toString(),false,listener);
-    }
 
     /**
      * 取消注册键盘监听器
@@ -148,8 +153,85 @@ public class KeyboardHelper{
     /**
      * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
      */
-    private static int dip2px(Context context,float dpValue){
-        final float scale = context.getResources().getDisplayMetrics().density;
+    private static int dip2px(float dpValue){
+        final float scale = Resources.getSystem().getDisplayMetrics().density;
         return (int)(dpValue * scale + 0.5f);
     }
+
+    /**
+     * 获取虚拟导航键的高度
+     *
+     * @param manager
+     * @return
+     */
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public static int getNavigationBarHeight(WindowManager manager){
+        Point point = new Point();
+        //不包含导航键高度
+        manager.getDefaultDisplay().getSize(point);
+        final int y = point.y;
+        //全部高度
+        manager.getDefaultDisplay().getRealSize(point);
+        return point.y - y;
+    }
+
+
+    /**
+     * 判断是否存在虚拟键盘
+     *
+     * @param window
+     * @return
+     */
+    public static boolean isHasNavigationBar(Window window){
+        ViewGroup vp = (ViewGroup)window.getDecorView();
+        for(int i = 0;i < vp.getChildCount();i++){
+            if(vp.getChildAt(i).getId() == android.R.id.navigationBarBackground){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断是否存在状态栏
+     *
+     * @param window
+     * @return
+     */
+    public static boolean isHasStatusBar(Window window){
+        ViewGroup vp = (ViewGroup)window.getDecorView();
+        for(int i = 0;i < vp.getChildCount();i++){
+            if(vp.getChildAt(i).getId() == android.R.id.statusBarBackground){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取状态栏高度
+     *
+     * @param window
+     * @return
+     */
+    public static int getStatusBarheight(Window window){
+        ViewGroup vp = (ViewGroup)window.getDecorView();
+        for(int i = 0;i < vp.getChildCount();i++){
+            if(vp.getChildAt(i).getId() == android.R.id.statusBarBackground){
+                return vp.getMeasuredHeight();
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * 判断是否存在虚拟键盘
+     *
+     * @param activity
+     * @return
+     */
+    public static boolean isHasNavigationBar(Activity activity){
+        return isHasNavigationBar(activity.getWindow());
+    }
+
 }
