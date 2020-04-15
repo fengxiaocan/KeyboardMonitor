@@ -34,30 +34,30 @@ public class KeyboardHelper{
     /**
      * 注册键盘监听器
      *
-     * @param window   当前所在的window,可以在dialog中使用
+     * @param activity
      * @param listener 回调
      */
-    public static void registerKeyboardListener(Window window,final OnKeyboardListener listener){
-        registerKeyboard(window,window.hashCode(),listener);
+    public static void registerKeyboardListener(Activity activity,final OnKeyboardListener listener){
+        registerKeyboard(activity,activity.hashCode(),listener);
     }
 
 
     /**
      * 注册键盘监听器
      *
-     * @param window   当前所在的window,可以在dialog中使用
+     * @param activity
      * @param tag      标记
      * @param listener 回调
      */
-    public static void registerKeyboardListener(final Window window,String tag,final OnKeyboardListener listener)
+    public static void registerKeyboardListener(Activity activity,String tag,final OnKeyboardListener listener)
     {
         if(tag!=null){
-            registerKeyboard(window,tag.hashCode(),listener);
+            registerKeyboard(activity,tag.hashCode(),listener);
         }
     }
 
-    public static void registerKeyboard(Window window,int key,final OnKeyboardListener listener){
-        if(window==null||listener==null){
+    public static void registerKeyboard(Activity activity,int key,final OnKeyboardListener listener){
+        if(activity==null||listener==null){
             return;
         }
         if(key >>> 24<2){
@@ -68,9 +68,9 @@ public class KeyboardHelper{
             sKeyboardMinHeight=dip2px(150);
         }
         final Rect windowRect=new Rect();
-        getDisplayHeight(window);
+        getDisplayHeight(activity.getWindowManager());
 
-        final View decorView=window.getDecorView();
+        final View decorView=activity.getWindow().getDecorView();
         final View visibleLayout=((ViewGroup)decorView).getChildAt(0);
         final OnGlobalLayoutListener layoutListener=new OnGlobalLayoutListener(){
             @Override
@@ -103,7 +103,7 @@ public class KeyboardHelper{
         ViewTreeObserver viewTreeObserver=decorView.getViewTreeObserver();
 
         //去除重复添加
-        Object tag=window.getDecorView().getTag(key);
+        Object tag=decorView.getTag(key);
         if(tag instanceof OnGlobalLayoutListener){
             viewTreeObserver.removeOnGlobalLayoutListener((OnGlobalLayoutListener)tag);
         }
@@ -115,18 +115,18 @@ public class KeyboardHelper{
     /**
      * 获取屏幕的设备绝对高度
      *
-     * @param window
+     * @param windowManager
      */
-    private static void getDisplayHeight(Window window){
+    private static void getDisplayHeight(WindowManager windowManager){
         if(sScreenDisplayHeight<=0){
             //全部高度
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1){
                 Point point=new Point();
-                window.getWindowManager().getDefaultDisplay().getRealSize(point);
+                windowManager.getDefaultDisplay().getRealSize(point);
                 sScreenDisplayHeight=point.y;
             } else{
                 final Rect windowRect=new Rect();
-                window.getWindowManager().getDefaultDisplay().getRectSize(windowRect);
+                windowManager.getDefaultDisplay().getRectSize(windowRect);
                 sScreenDisplayHeight=windowRect.height();
             }
         }
@@ -135,41 +135,41 @@ public class KeyboardHelper{
     /**
      * 注册键盘监听器
      *
-     * @param window 当前所在的window,可以在dialog中使用
+     * @param activity 当前所在的window
      */
-    public static void unregisterKeyboardListener(Window window){
-        if(window!=null){
-            unregisterKeyboardListener(window,window.hashCode());
+    public static void unregisterKeyboardListener(Activity activity){
+        if(activity!=null){
+            unregisterKeyboardListener(activity,activity.hashCode());
         }
     }
 
     /**
      * 取消注册键盘监听器
      *
-     * @param window 当前所在的window,可以在dialog中使用
-     * @param tag    标记
+     * @param activity 当前所在的activity
+     * @param tag      标记
      */
-    public static void unregisterKeyboardListener(Window window,String tag){
+    public static void unregisterKeyboardListener(Activity activity,String tag){
         if(tag!=null){
-            unregisterKeyboardListener(window,tag.hashCode());
+            unregisterKeyboardListener(activity,tag.hashCode());
         }
     }
 
     /**
      * 取消注册键盘监听器
      *
-     * @param window 当前所在的window,可以在dialog中使用
-     * @param key    标记
+     * @param activity 当前所在的activity
+     * @param key      标记
      */
-    public static void unregisterKeyboardListener(Window window,int key){
+    public static void unregisterKeyboardListener(Activity activity,int key){
         if(key >>> 24<2){
             key=-key;
         }
-        if(window!=null){
-            View decorView=window.getDecorView();
+        if(activity!=null){
+            View decorView=activity.getWindow().getDecorView();
             ViewTreeObserver viewTreeObserver=decorView.getViewTreeObserver();
 
-            Object tag=window.getDecorView().getTag(key);
+            Object tag=decorView.getTag(key);
             if(tag instanceof OnGlobalLayoutListener){
                 viewTreeObserver.removeOnGlobalLayoutListener((OnGlobalLayoutListener)tag);
             }
@@ -206,11 +206,11 @@ public class KeyboardHelper{
     /**
      * 判断是否存在虚拟键盘
      *
-     * @param window
+     * @param activity
      * @return
      */
-    public static boolean isHasNavigationBar(Window window){
-        ViewGroup vp=(ViewGroup)window.getDecorView();
+    public static boolean isHasNavigationBar(Activity activity){
+        ViewGroup vp=(ViewGroup)activity.getWindow().getDecorView();
         for(int i=0;i<vp.getChildCount();i++){
             if(vp.getChildAt(i).getId()==android.R.id.navigationBarBackground){
                 return true;
@@ -222,11 +222,11 @@ public class KeyboardHelper{
     /**
      * 判断是否存在状态栏
      *
-     * @param window
+     * @param activity
      * @return
      */
-    public static boolean isHasStatusBar(Window window){
-        ViewGroup vp=(ViewGroup)window.getDecorView();
+    public static boolean isHasStatusBar(Activity activity){
+        ViewGroup vp=(ViewGroup)activity.getWindow().getDecorView();
         for(int i=0;i<vp.getChildCount();i++){
             if(vp.getChildAt(i).getId()==android.R.id.statusBarBackground){
                 return true;
@@ -238,11 +238,10 @@ public class KeyboardHelper{
     /**
      * 获取状态栏高度
      *
-     * @param window
      * @return
      */
-    public static int getStatusBarheight(Window window){
-        ViewGroup vp=(ViewGroup)window.getDecorView();
+    public static int getStatusBarheight(Activity activity){
+        ViewGroup vp=(ViewGroup)activity.getWindow().getDecorView();
         for(int i=0;i<vp.getChildCount();i++){
             if(vp.getChildAt(i).getId()==android.R.id.statusBarBackground){
                 return vp.getMeasuredHeight();
@@ -251,14 +250,5 @@ public class KeyboardHelper{
         return 0;
     }
 
-    /**
-     * 判断是否存在虚拟键盘
-     *
-     * @param activity
-     * @return
-     */
-    public static boolean isHasNavigationBar(Activity activity){
-        return isHasNavigationBar(activity.getWindow());
-    }
 
 }
