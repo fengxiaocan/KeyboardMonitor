@@ -1,7 +1,9 @@
 package com.keyboard.test;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -30,20 +32,22 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        KeyboardHelper.registerKeyboardListener(getWindow(),new OnKeyboardListener(){
+        OnKeyboardListener listener=new OnKeyboardListener(){
             @Override
             public void onKeyBoardEvent(boolean isShow,int height){
                 if(isShow){
                     tvPan.setVisibility(View.GONE);
                 } else{
-                    if(height > 0){
-                        tvPan.setText("Keyboard Height:" + height);
-                        tvPan.getLayoutParams().height = height;
+                    if(height>0){
+                        tvPan.setText("Keyboard Height:"+height);
+                        tvPan.getLayoutParams().height=height;
                         tvPan.setVisibility(View.VISIBLE);
                     }
                 }
             }
-        });
+        };
+
+        KeyboardHelper.registerKeyboardListener(getWindow(),listener);
     }
 
     private void initView(){
