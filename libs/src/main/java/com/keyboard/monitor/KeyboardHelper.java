@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -76,7 +75,6 @@ public class KeyboardHelper{
         final OnGlobalLayoutListener layoutListener=new OnGlobalLayoutListener(){
             @Override
             public void onGlobalLayout(){
-                Log.e("noah","onGlobalLayout");
                 decorView.getWindowVisibleDisplayFrame(windowRect);
                 //获取可见view的高度
                 final int dHeight=decorView.getMeasuredHeight();
