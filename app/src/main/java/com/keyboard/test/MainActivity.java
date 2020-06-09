@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity{
             }
         };
 
-        KeyboardHelper.registerKeyboardListener(getWindow(),listener);
+        KeyboardHelper.registerKeyboardListener(this,listener);
     }
 
     private void initView(){

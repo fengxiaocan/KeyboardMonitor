@@ -1,6 +1,7 @@
 package com.keyboard.monitor;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -9,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.RequiresApi;
@@ -17,9 +17,13 @@ import androidx.annotation.RequiresApi;
 public class KeyboardHelper{
 
 
+    private static final String KEYBOARD_NAME="KeyboardHelper";
+    private static final String KEYBOARD_HEIGHT_NAME="KeyboardHeight";
+
     private static int sScreenDisplayHeight=-1;
     private static int sKeyboardMinHeight=-1;
     private static int sKeyboardHeight=-1;
+    private static int sDefultKeyboardHeight=dip2px(250);
 
     /**
      * 可以自己设置最小高度判断
@@ -28,6 +32,15 @@ public class KeyboardHelper{
      */
     public static void initMinHeight(int sMinHeight){
         KeyboardHelper.sKeyboardMinHeight=sMinHeight;
+    }
+
+    /**
+     * 初始化最小的默认高度
+     *
+     * @param sDefultHeight
+     */
+    public static void initDefultHeight(int sDefultHeight){
+        KeyboardHelper.sDefultKeyboardHeight=sDefultHeight;
     }
 
 
@@ -67,6 +80,12 @@ public class KeyboardHelper{
         if(sKeyboardMinHeight<=0){
             sKeyboardMinHeight=dip2px(150);
         }
+
+        if(sKeyboardHeight<=0){
+            sKeyboardHeight=activity.getSharedPreferences(KEYBOARD_NAME,Context.MODE_PRIVATE).getInt(
+                    KEYBOARD_HEIGHT_NAME,
+                    sDefultKeyboardHeight);
+        }
         final Rect windowRect=new Rect();
         getDisplayHeight(activity.getWindowManager());
 
@@ -93,6 +112,9 @@ public class KeyboardHelper{
                     //键盘没有弹出来
                     listener.onKeyBoardEvent(false,sKeyboardHeight);
                 } else{
+                    decorView.getContext().getSharedPreferences(KEYBOARD_NAME,Context.MODE_PRIVATE).edit().putInt(
+                            KEYBOARD_HEIGHT_NAME,
+                            dy).apply();
                     //键盘弹出来了
                     listener.onKeyBoardEvent(true,sKeyboardHeight=dy);
                 }
